@@ -1,0 +1,53 @@
+ <html>
+     <head>
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+       <script>
+            $(function() {
+               $('h1').html(function(index, oldHTML){
+                 return oldHTML + "Finally?";
+               });
+               $('h1').addClass('highlight-blue');
+               $('#header > h1 ').css('background-color', 'cyan');
+               $('ul li:not(.highlight-blue)').addClass(
+                 'highlight-green');
+               $('tr:nth-child(odd)').addClass('zebra');
+            });
+       </script>
+       <style>
+         .highlight-blue {
+           color: blue;
+         }
+         .highlight-green{
+           color: green;
+         }
+         .zebra{
+           background-color: #666666;
+           color: white;
+          } 
+        </style> 
+</head>
+<body>
+<div id=header>
+  <h1>Are we there yet ? </h1>
+  <span class="highlight">
+    <p>Journey to Mars</p>
+    <ul>
+      <li>First</li>
+      <li>Second</li>
+      <li class="highlight-blue">Third</li>
+    </ul>
+  </span>
+  <table>
+      <tr>
+        <th>Id</th>
+        <th>First name</th>
+        <th>Last Name</th>
+      </tr>
+     <tr><td>1</td><td>Albert</td><td>Einstein</td></tr>
+     <tr><td>2</td><td>Issac</td><td>Newton</td></tr>
+     <tr><td>3</td><td>Enrico</td><td>Fermi</td></tr>
+     <tr><td>4</td><td>Richard</td><td>Feynman</td></tr>
+  </table>
+ </div>
+</body>
+</html>

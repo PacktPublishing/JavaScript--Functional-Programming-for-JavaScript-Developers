@@ -1,0 +1,21 @@
+{
+  "name": "chapter9",
+  "version": "1.0.0",
+  "description": "chapter9 sample project",
+  "main": "app.js",
+  "dependencies": {
+    "async": "^1.5.0",
+    "request": "^2.65.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Chapter9",
+    "sample",
+    "project"
+  ],
+  "author": "Ved Antani",
+  "license": "MIT"
+}

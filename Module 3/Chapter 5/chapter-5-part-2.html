@@ -1,0 +1,265 @@
+<html>
+<body>
+<h1>CHAPTER 5 PART 2</h1>
+<script>
+
+
+// _________________________________________________
+//    C H A P T E R   5   P A R T   2
+// =================================================
+
+
+// --- will need all these functions from part 1 -------
+
+
+var typeOf = function(type) {
+    return function(x) {
+        if (typeof x === type) {
+            return x;
+        } else {
+            throw new TypeError("Error: "+type+" expected, "+typeof x+" given.");   
+        }
+    }
+}
+
+var str = typeOf('string'),
+    num = typeOf('number'),
+    func = typeOf('function'),
+    bool = typeOf('boolean');
+
+var obj = function(o) {
+    if (Object.prototype.toString.call(o)==="[object Object]") {
+        return o;   
+    } else {
+        throw new TypeError("Error: Object expected, something else given."); 
+    }
+}
+
+var objectTypeOf = function(name) {
+    return function(o) {
+        if (Object.prototype.toString.call(o) === "[object "+name+"]") {
+            return o;   
+        } else {
+            throw new TypeError("Error: "+name+" expected, something else given."); 
+        }
+    }
+}
+var obj = objectTypeOf('Object');
+var arr = objectTypeOf('Array');
+var date = objectTypeOf('Date');
+var div = objectTypeOf('HTMLDivElement');
+
+// arrayOf :: (a -> b) -> ([a] -> [b])
+var arrayOf = function(f) {
+    return function(a) {
+        return map(func(f), arr(a));
+    }
+}
+
+// map :: (a -> b) -> [a] -> [b]
+var map = function(f, a) {
+    return arr(a).map(func(f));
+}
+
+
+// --- maybes -----------------------------------------------------------
+
+
+// the Maybe monad constructor, empty for now
+var Maybe = function(){}; 
+
+// the None instance, a wrapper for an object with no value
+var None = function(){}; 
+None.prototype = Object.create(Maybe.prototype);
+None.prototype.toString = function(){return 'None';};
+
+// now we can write the `none` function
+// saves us from having to write `new None()` all the time
+var none = function(){return new None()};
+
+// and the Just instance, a wrapper for an object with a value
+var Just = function(x){return this.x = x;};
+Just.prototype = Object.create(Maybe.prototype);
+Just.prototype.toString = function(){return "Just "+this.x;};
+var just = function(x) {return new Just(x)};
+
+var maybe = function(m){
+    if (m instanceof None) {
+        return m;   
+    } else if (m instanceof Just) {
+        return just(m.x);   
+    } else {
+        throw new TypeError("Error: Just or None expected, " + m.toString() + " given."); 
+    }
+}
+
+var maybeOf = function(f){
+    return function(m) {
+        if (m instanceof None) {
+            return m;   
+        } else if (m instanceof Just) {
+            return just(f(m.x));   
+        } else {
+            throw new TypeError("Error: Just or None expected, " + m.toString() + " given."); 
+        }
+    }
+}
+
+Maybe.prototype.orElse = function(y) {
+    if (this instanceof Just) {
+        return this.x;
+    } else {
+        return y;
+    }
+}
+
+function plusplus(n) {
+    return num(n) + 1;
+}
+
+console.log(
+  maybe(just(123)).x); // Returns 123
+console.log(
+  maybeOf(plusplus)(just(123)).x); // Returns 124
+console.log(
+  maybeOf(plusplus)(none()).orElse('none')); // returns 'none'
+
+Function.prototype.curry = function (numArgs) {
+    var func = this;
+    numArgs = numArgs || func.length;
+
+    // recursively acquire the arguments
+    function subCurry(prev) {
+        return function (arg) {
+            var args = prev.concat(arg);
+            if (args.length < numArgs) {
+                // recursive case: we still need more args
+                return subCurry(args);
+            } else {
+                // base case: apply the function
+                return func.apply(this, args);
+            }
+        };
+    }
+    return subCurry([]);
+};
+
+maybePlusPlus = maybeOf.curry()(plusplus);
+console.log(
+  maybePlusPlus(just(123)).x); // returns 124
+console.log(
+  maybePlusPlus(none()).orElse('none')); // returns none
+
+var User = function(){
+    this.username = none(); // initially set to `none`
+};
+User.prototype.setUsername = function(name) {
+    this.username = just(str(name)); // it's now a `just`   
+};
+User.prototype.getUsernameMaybe = function() {
+    var usernameMaybe = maybeOf.curry()(str);  
+    console.log( usernameMaybe(this.username).orElse('anonymous') );
+    return usernameMaybe(this.username).orElse('anonymous');
+};
+
+var user = new User();
+user.getUsernameMaybe(); // Returns 'anonymous'
+
+user.setUsername('Laura');
+user.getUsernameMaybe(); // Returns 'Laura'
+
+
+// --- LENSES ------------------------------------------------------
+
+var lens = function(get, set) {
+    var f = function (a) {return get(a)};
+    f.get = function (a) {return get(a)}; 
+    f.set = set;
+    f.mod = function (f, a) {return set(a, f(get(a)))};
+    return f;
+};
+
+var first = lens(
+    function (a) { return arr(a)[0]; }, // get
+    function (a, b) { return [b].concat(arr(a).slice(1)); } // set
+);
+console.log(
+  first([1, 2, 3])); // outputs 1
+console.log(
+  first.set([1, 2, 3], 5)); // outputs [5, 2, 3]
+function tenTimes(x) { return x * 10 }
+console.log(
+  first.mod(tenTimes, [1,2,3])); // outputs [10,2,3]
+
+// userName :: User -> str
+var userName = lens(
+    function (u) {return u.getUsernameMaybe()}, // get
+    function (u, v) { // set
+        u.setUsername(v);  
+        return u.getUsernameMaybe(); 
+    } 
+);
+
+Function.prototype.compose = function(prevFunc) {
+    var nextFunc = this;
+    return function() {
+       return nextFunc.call(this,prevFunc.apply(this,arguments));
+    }
+}
+
+var bob = new User();
+bob.setUsername('Bob');
+userName.get(bob); // returns 'Bob'
+userName.set(bob, 'Bobby'); //return 'Bobby'
+userName.get(bob); // returns 'Bobby'
+function strToUpper(str){return str.toUpperCase()};
+userName.mod(strToUpper, bob); // returns 'BOBBY'
+console.log(
+  strToUpper.compose(userName.set)(bob, 'robert')); // returns 'ROBERT'
+userName.get(bob); // returns 'robert'
+
+
+
+// --- implementing catagories ------------------------------------------
+
+var checkTypes = function( typeSafeties ) {
+    arrayOf(func)(arr(typeSafeties));
+    var argLength = typeSafeties.length;
+    return function(args) {
+        arr(args);
+        if (args.length != argLength) {
+            throw new TypeError('Expected '+ argLength + ' arguments');
+        }
+        var results = [];
+        for (var i=0; i<argLength; i++) {
+            results[i] = typeSafeties[i](args[i]);   
+        }
+        return results;
+    }
+}
+
+var homoMorph = function( /* input1, input2,..., inputN, output */ ) {
+    var before = checkTypes(arrayOf(func)(Array.prototype.slice.call(arguments, 0, arguments.length-1)));
+    var after = func(arguments[arguments.length-1])
+    return function(middle) {
+        return function(args) {
+            return after(middle.apply(this, before([].slice.apply(arguments))));   
+        }
+    }
+}
+
+// now we don't need to add type signature comments
+// because now they're built right into the function declaration 
+var add = homoMorph(num, num, num)(function(a,b){return a+b})
+console.log(add(12,24)); // returns 36
+//add('a', 'b'); // throws error
+var asdf = homoMorph(num, num, num)(function(a,b){
+   return a+b;
+}); 
+console.log(add(18, 24)); // returns 42
+
+
+
+</script>
+</body>
+</html>

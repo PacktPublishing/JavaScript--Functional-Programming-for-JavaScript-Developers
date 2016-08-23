@@ -1,0 +1,22 @@
+<html>
+ <head>
+   <title>DOM</title>
+   <script>
+     showFeelings = function() {
+       var feelings = document.getElementsByName("feeling");
+       alert(feelings[0].getAttribute("value"));
+       alert(feelings[1].getAttribute("value"));
+      }
+   </script>
+ </head>
+ <body>
+   <p>Hello World!</p>
+   <form method="post" action="/post">
+      <fieldset>
+        <p>How are you feeling today?</p>
+          <input type="radio" name="feeling" value="Happy" />Happy<br />
+          <input type="radio" name="feeling" value="Sad" />Sad<br />
+     </fieldset>
+     <input type="button" value="Submit" onClick="showFeelings()"/> </form>
+ </body>
+</html>

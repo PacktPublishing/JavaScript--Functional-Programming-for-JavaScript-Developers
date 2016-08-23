@@ -1,0 +1,110 @@
+<html>
+<head>
+  <script src='underscore.min.js'></script>
+  <script src='lazy.min.js'></script>
+</head>
+<body>
+<h1>Chapter 3</h1>
+open the developer console to check the output (shortcut F12)
+<br><br>
+<select id="timezones">
+  <option>Ney York</option>
+  <option>Chicago</option>
+  <option>Denver</option>
+  <option>Los Angeles</option>
+</select>
+
+<script>
+
+// ____________________________________________________
+//   C H A P T E R   3 
+// ____________________________________________________
+
+
+// --- UNDERSCORE ------------------------------------------------
+
+var x = _.map([1,2,3], Math.sqrt); // Underscore's map function
+console.log(x.toString());
+
+var greetings = [{origin: 'spanish', value: 'hola'}, 
+                 {origin: 'english', value: 'hello'}];
+                 
+console.log(  _.pluck(greetings, 'value')  ); 
+// Grabs an object's property. 
+// Returns: ['hola', 'hello']
+
+console.log(  _.find(greetings, function(s) {return s.origin == 'spanish';})  ); 
+// Looks for the first obj that passes the truth test
+// Returns: {origin: 'spanish', value: 'hola'}
+
+greetings = greetings.concat(_.object(['origin','value'],['french','bonjour']));
+console.log(  greetings  );
+// _.object creates an object literal from two merged arrays
+// Returns: [{origin: 'spanish', value: 'hola'}, 
+//           {origin: 'english', value: 'hello'},
+//           {origin: 'french', value: 'bonjour'}]
+
+var g = _.chain(greetings)
+   .sortBy(function(x) {return x.value.length})
+   .pluck('origin')
+   .map(function(x){return x.charAt(0).toUpperCase()+x.slice(1)})
+   .reduce(function(x, y){return x + ' ' + y}, '')
+   .value();
+// Applies the functions 
+// Returns: 'Spanish English French'
+console.log(g);
+
+
+function getSelectedOptions(id, value) {
+    options = document.querySelectorAll('#' + id + ' option');
+    var newOptions = _.map(options, function(opt){
+        if (opt.text == value) {
+            opt.selected = true;
+            opt.text += ' (this is the default)';
+        } else { 
+            opt.selected = false;
+        }
+	    return opt;
+    });
+    return newOptions;
+}
+var optionsHelp = getSelectedOptions('timezones', 'Chicago');
+
+
+// ---- LAZY.JS --------------------------------------------
+
+var lyrics = "Pressure \npushing down on me \nPressing down on you, \nno man ask for \nUnder pressure \nthat burns a building down \nSplits a family in two \nPuts people on streets";
+
+// Get the first eight lines of a song's lyrics
+// Without Lazy, the entire string is first split into lines
+console.log(
+  lyrics.split('\n').slice(0,3)
+);
+
+// With Lazy, the text is only split into the first 8 lines
+// The lyrics can even be infinitely long!
+console.log(
+  Lazy(lyrics).split('\n').take(3).toString()
+); 
+
+//First 10 squares that are evenly divisible by 3
+var oneTo1000 = Lazy.range(1, 1000).toArray(); 
+var sequence = Lazy(oneTo1000)
+  .map(function(x) { return x * x; })
+  .filter(function(x) { return x % 3 === 0; })
+  .take(10)
+  .each(function(x) { console.log(x); });
+
+// asynchronous iteration over an infinite sequence
+var asyncSequence = Lazy.generate(function(x){return x++})
+  .async(100)           // 0.100s intervals between elements
+  .take(20)             // only compute the first 20  
+  .each(function(e) {   // begin iterating over the sequence
+    console.log(new Date().getMilliseconds() + ": " + e);
+  });
+  
+
+
+</script>
+</body>
+</html>

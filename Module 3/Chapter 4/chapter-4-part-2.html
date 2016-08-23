@@ -1,0 +1,201 @@
+<html>
+<head>
+</head>
+<body>
+<h1>Chapter 4 part 2</h1>
+open the developer console to check the output (shortcut F12)
+<br><br>
+
+
+<script>
+
+// ____________________________________________________
+//   C H A P T E R   4   P A R T   2 
+// ____________________________________________________
+
+
+// --- FUNCTION COMPOSITION ------------------------------------------------
+console.log('testing compose...')
+
+Function.prototype.compose = function(prevFunc) {
+    var nextFunc = this;
+    return function() {
+       return nextFunc.call(this,prevFunc.apply(this,arguments));
+    }
+}
+
+var roundedSqrt = Math.round.compose(Math.sqrt)
+console.log( roundedSqrt(5) ); // Returns: 2
+
+var squaredDate =  roundedSqrt.compose(Date.parse)
+console.log( squaredDate("January 1, 2014") ); // Returns: 1178370 
+
+function function1(a){return a + ' 1';}
+function function2(b){return b + ' 2';}
+function function3(c){return c + ' 3';}
+var composition = function3.compose(function2).compose(function1);
+console.log( composition('count') ); // returns 'count 1 2 3'
+
+Function.prototype.sequence  = function(prevFunc) {
+    var nextFunc = this;
+    return function() {
+       return prevFunc.call(this,nextFunc.apply(this,arguments));
+    }
+}
+
+var sequences = function1.sequence(function2).sequence(function3);
+console.log( sequences('count') ); // returns 'count 1 2 3'
+
+function floorSqrt1(num) {
+    var sqrtNum = Math.sqrt(num);
+    var floorSqrt = Math.floor(sqrtNum);
+    var stringNum = String(floorSqrt);
+    return stringNum;
+}
+
+function floorSqrt2(num) {
+    return String(Math.floor(Math.sqrt(num)));
+}
+
+function floorSqrt3(num) {
+    return [num].map(Math.sqrt).map(Math.floor).toString();
+}
+
+var floorSqrt4 = String.compose(Math.floor).compose(Math.sqrt);
+
+var floorSqrt5 = Math.sqrt.sequence(Math.floor).sequence(String);
+
+
+console.log(  floorSqrt1(17)  ); // Returns: 4
+console.log(  floorSqrt2(17)  ); // Returns: 4
+console.log(  floorSqrt3(17)  ); // Returns: 4
+console.log(  floorSqrt4(17)  ); // Returns: 4
+console.log(  floorSqrt5(17)  ); // Returns: 4
+
+
+// ---
+
+// stringToArray :: String -> [Char]
+function stringToArray(s) { return s.split(''); }
+
+// arrayToString :: [Char] -> String
+function arrayToString(a) { return a.join(''); }
+
+// nextChar :: Char -> Char
+function nextChar(c) { 
+    return String.fromCharCode(c.charCodeAt(0) + 1); }
+
+// previousChar :: Char -> Char
+function previousChar(c) {
+    return String.fromCharCode(c.charCodeAt(0)-1); }
+
+// higherColorHex :: Char -> Char
+function higherColorHex(c) {return c >= 'f' ? 'f' : 
+                                   c == '9' ? 'a' :
+                                   nextChar(c)}
+
+// lowerColorHex :: Char -> Char
+function lowerColorHex(c) { return c <= '0' ? '0' : 
+                                   c == 'a' ? '9' : 
+                                   previousChar(c); }
+
+// raiseColorHexes :: String -> String
+function raiseColorHexes(arr) { return arr.map(higherColorHex); }
+
+// lowerColorHexes :: String -> String
+function lowerColorHexes(arr) { return arr.map(lowerColorHex); }
+
+var lighterColor = arrayToString
+    .compose(raiseColorHexes)
+    .compose(stringToArray)
+var darkerColor = arrayToString
+    .compose(lowerColorHexes)
+    .compose(stringToArray)
+
+console.log(  lighterColor('af0189')  ); // Returns: ‘bf129a’
+console.log(  darkerColor('af0189')   );  // Returns: ‘9e0078’
+
+// component2hex :: Ints -> Int
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+// nums2hex :: Ints* -> Int
+function nums2hex() {
+    return Array.prototype.map.call(arguments, componentToHex).join('');
+}
+
+Function.prototype.curry = function (numArgs) {
+    var func = this;
+    numArgs = numArgs || func.length;
+
+    // recursively acquire the arguments
+    function subCurry(prev) {
+        return function (arg) {
+            var args = prev.concat(arg);
+            if (args.length < numArgs) {
+                // recursive case: we still need more args
+                return subCurry(args);
+            } else {
+                // base case: apply the function
+                return func.apply(this, args);
+            }
+        };
+    }
+    return subCurry([]);
+};
+
+Function.prototype.partialApply = function(){
+    var func = this; 
+    args = Array.prototype.slice.call(arguments);
+    return function(){
+        return func.apply(this, args.concat(
+            Array.prototype.slice.call(arguments)
+        ));
+    };
+};
+
+var lighterColors = lighterColor
+    .compose(nums2hex);
+var darkerRed = darkerColor
+    .compose(nums2hex.partialApply(255));
+var lighterRgb2hex = lighterColor
+    .compose(nums2hex.partialApply());
+
+console.log(  lighterColors(123, 0, 22)  ); // Returns: 8cff11 
+console.log(  darkerRed(123, 0)  );   // Returns: ee6a00 
+console.log(  lighterRgb2hex(123,200,100)  );  // Returns: 8cd975
+
+function rgb2hex(r, g, b) {
+    // nums2hex is previously defined in this chapter
+    return '#' + nums2hex(r) + nums2hex(g) + nums2hex(b);
+}
+var hexColors = rgb2hex.curry();
+var reds   = function(g,b){return hexColors(255)(g)(b)};
+var greens = function(r,b){return hexColors(r)(255)(b)};
+var blues  = function(r,g){return hexColors(r)(g)(255)};
+
+
+// lighterColorNumSteps :: string -> num -> string
+function lighterColorNumSteps(color, n) {
+    for (var i = 0; i < n; i++) {
+        color = lighterColor(color);
+    }
+    return color;
+}
+
+// now we can create functions like this:
+var lighterRedNumSteps = 
+    lighterColorNumSteps.curry().compose(reds)(0,0);
+
+// and use them like this:
+console.log(  lighterRedNumSteps(5)  ); // Return: ‘ff5555’
+console.log(  lighterRedNumSteps(2)  ); // Return: ‘ff2222’
+
+
+
+
+</script>
+</body>
+</html>

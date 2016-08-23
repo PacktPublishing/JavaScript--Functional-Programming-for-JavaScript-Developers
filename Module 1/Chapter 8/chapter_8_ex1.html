@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>DOM</title>
+    <script>
+    // run this function when the document is loaded
+      window.onload = function() {
+        var doc = document.documentElement;
+        var body = doc.body;
+        var _head = doc.firstChild;
+        var _body = doc.lastChild;
+        var _head_ = doc.childNodes[0];
+        var title = _head.firstChild;
+        alert(_head.parentNode === doc); //true
+		} 
+	</script>
+	</head>
+	<body>
+	<p>Hello World!</p>
+	</body>
+</html>
