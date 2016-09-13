@@ -1,4 +1,4 @@
-# Functional-Programming-in-Javascript
+# Functional Programming in Javascript
 Functional Programming in Javascript by Packt
 
 
