@@ -1,5 +1,5 @@
 # Functional-Programming-in-Javascript
-Functional Programming in Javascript by Packt Publishing
+Functional Programming in Javascript by Packt
 
 
 ##What You Will Learn:
