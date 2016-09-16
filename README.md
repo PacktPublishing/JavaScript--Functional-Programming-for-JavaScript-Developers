@@ -24,10 +24,10 @@ You will see code something similar to the following:
 
 ```
   function add(a,b){
- return a+b;
-}
-c = add(1,2);
-console.log(c);  //prints 3
+    return a+b;
+  }
+  c = add(1,2);
+  console.log(c);  //prints 3
  
 ```
 
