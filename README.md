@@ -31,7 +31,7 @@ You will see code something similar to the following:
  
 ```
 
-###Related **Data Visualization** Products:
+###Related **JavaScript** Products:
 [Mastering JavaScript Design Patterns](https://www.packtpub.com/application-development/mastering-javascript-design-patterns?utm_source=github&utm_medium=repository&utm_campaign=9781783987986)
 
 [Object-Oriented JavaScript](https://www.packtpub.com/web-development/object-oriented-javascript?utm_source=github&utm_medium=repository&utm_campaign=9781847194145)
