@@ -1,8 +1,3 @@
-## $5 Tech Unlocked 2021!
-[Buy and download this Course for only $5 on PacktPub.com](https://www.packtpub.com/product/javascript-functional-programming-for-javascript-developers/9781787124660)
------
-*The $5 campaign         runs from __December 15th 2020__ to __January 13th 2021.__*
-
 # JavaScript: Functional Programming for JavaScript Developers
 This is the code repository for [JavaScript: Functional Programming for JavaScript Developers](https://github.com/PacktPublishing/JavaScript-Functional-Programming-for-JavaScript-Developers), published by Packt. It contains all the supporting project files necessary to work through the book from start to finish.
 
